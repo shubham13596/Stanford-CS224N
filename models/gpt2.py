@@ -23,8 +23,8 @@ class GPT2Model(GPTPreTrainedModel):
     self.config = config
 
     # Embedding layers.
-    self.word_embedding = nn.Embedding(config.vocab_size, config.hidden_size, padding_idx=config.pad_token_id)
-    self.pos_embedding = nn.Embedding(config.max_position_embeddings, config.hidden_size)
+    self.word_embedding = nn.Embedding(config.vocab_size, config.hidden_size, padding_idx=config.pad_token_id) #5okx768
+    self.pos_embedding = nn.Embedding(config.max_position_embeddings, config.hidden_size) #1024*768
     self.embed_dropout = nn.Dropout(config.hidden_dropout_prob)
 
     # Register position_ids (1, len position emb) to buffer because it is a constant.
@@ -46,20 +46,14 @@ class GPT2Model(GPTPreTrainedModel):
   def embed(self, input_ids):
     input_shape = input_ids.size()
     seq_length = input_shape[1]
-
-    inputs_embeds = None
-
-    ### YOUR CODE HERE
-    raise NotImplementedError
-
+    inputs_embeds = self.word_embedding(input_ids)
 
     pos_ids = self.position_ids[:, :seq_length]
-    pos_embeds = None
-
-    ### TODO: Use pos_ids to get position embedding from self.pos_embedding into pos_embeds.
-    ###       Then, add two embeddings together; then apply dropout and return.
-    ### YOUR CODE HERE
-    raise NotImplementedError
+    pos_embeds = self.pos_embedding(pos_ids)
+    
+    x = inputs_embeds + pos_embeds
+    x = self.embed_dropout(x)
+    return x
 
 
   def encode(self, hidden_states, attention_mask):
@@ -105,9 +99,8 @@ class GPT2Model(GPTPreTrainedModel):
 
       return hidden_state(s) * E^T
     """
-    ### YOUR CODE HERE
-    raise NotImplementedError
-
+    return self.word_embedding(hidden_state)
+    
 
   @classmethod
   def from_pretrained(cls, model='gpt2', d=768, l=12, num_heads=12):

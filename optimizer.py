@@ -44,6 +44,14 @@ class AdamW(Optimizer):
 
                 # Access hyperparameters from the `group` dictionary.
                 alpha = group["lr"]
+                beta1 = torch.randn()
+                beta2 = torch.randn()
+                mt = grad
+                vt = mt * mt
+                
+                
+
+
 
 
                 ### TODO: Complete the implementation of AdamW here, reading and saving
