@@ -39,7 +39,7 @@ class GPT2Model(GPTPreTrainedModel):
     self.pooler_af = nn.Tanh()
 
     # Final layer norm.
-    self.final_layer_norm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
+    self.final_layer_norm = nn.LayerNorm(config.hidden_size, eps = config.layer_norm_eps)
 
     self.init_weights()
 
