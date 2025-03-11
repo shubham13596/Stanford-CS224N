@@ -1,5 +1,8 @@
 # CS 224N Default Final Project: Build GPT-2
 
+** This is my attempt at solving the final project of CS224N. Update as of 12th March - Part 1 of the Final project i.e. implementing GPT 2 is now complete. 
+Part 2 is WIP **
+
 This is the default final project for the Stanford CS 224N class. Please refer to the project handout on the course
 website for detailed instructions and an overview of the codebase.
 
