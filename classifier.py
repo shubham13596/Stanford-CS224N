@@ -7,6 +7,7 @@ Trains and evaluates GPT2SentimentClassifier on SST and CFIMDB
 import random, numpy as np, argparse
 from types import SimpleNamespace
 import csv
+import wandb
 
 import torch
 import torch.nn.functional as F
@@ -247,6 +248,22 @@ def save_model(model, optimizer, args, config, filepath):
 
 
 def train(args):
+  # Initialize wandb if flag is set
+  if hasattr(args, 'use_wandb') and args.use_wandb:
+    # Extract dataset name from train path
+    dataset_name = 'sst' if 'sst' in args.train else 'cfimdb'
+    wandb.init(
+      project="cs224n-sentiment-classifier",
+      name=f"{dataset_name}-{args.fine_tune_mode}",
+      config={
+        "learning_rate": args.lr,
+        "epochs": args.epochs,
+        "batch_size": args.batch_size,
+        "fine_tune_mode": args.fine_tune_mode,
+        "hidden_dropout_prob": args.hidden_dropout_prob,
+        "dataset": dataset_name
+      }
+    )
   device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
   # Create the data and its corresponding datasets and dataloader.
   train_data, num_labels = load_data(args.train, 'train')
@@ -309,6 +326,19 @@ def train(args):
       save_model(model, optimizer, args, config, args.filepath)
 
     print(f"Epoch {epoch}: train loss :: {train_loss :.3f}, train acc :: {train_acc :.3f}, dev acc :: {dev_acc :.3f}")
+    # Log metrics to wandb
+    if hasattr(args, 'use_wandb') and args.use_wandb:
+        wandb.log({
+        "epoch": epoch,
+        "train_loss": train_loss,
+        "train_accuracy": train_acc, 
+        "train_f1": train_f1,
+        "dev_accuracy": dev_acc,
+        "dev_f1": dev_f1
+    })
+    # End wandb run at the end of training
+    if hasattr(args, 'use_wandb') and args.use_wandb:
+        wandb.finish()
 
 
 def test(args):
@@ -353,6 +383,7 @@ def get_args():
   parser = argparse.ArgumentParser()
   parser.add_argument("--seed", type=int, default=11711)
   parser.add_argument("--epochs", type=int, default=10)
+  parser.add_argument("--use_wandb", action='store_true')
   parser.add_argument("--fine-tune-mode", type=str,
                       help='last-linear-layer: the GPT parameters are frozen and the task specific head parameters are updated; full-model: GPT parameters are updated as well',
                       choices=('last-linear-layer', 'full-model'), default="last-linear-layer")
@@ -379,6 +410,7 @@ if __name__ == "__main__":
     epochs=args.epochs,
     batch_size=args.batch_size,
     hidden_dropout_prob=args.hidden_dropout_prob,
+    use_wandb=args.use_wandb,  # Add this line
     train='data/ids-sst-train.csv',
     dev='data/ids-sst-dev.csv',
     test='data/ids-sst-test-student.csv',
@@ -403,6 +435,7 @@ if __name__ == "__main__":
     train='data/ids-cfimdb-train.csv',
     dev='data/ids-cfimdb-dev.csv',
     test='data/ids-cfimdb-test-student.csv',
+    use_wandb=args.use_wandb,  # Add this line
     fine_tune_mode=args.fine_tune_mode,
     dev_out='predictions/' + args.fine_tune_mode + '-cfimdb-dev-out.csv',
     test_out='predictions/' + args.fine_tune_mode + '-cfimdb-test-out.csv'
