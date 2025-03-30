@@ -14,6 +14,7 @@ trains and evaluates your ParaphraseGPT model and writes the required submission
 import argparse
 import random
 import torch
+import wandb
 
 import numpy as np
 import torch.nn.functional as F
@@ -101,6 +102,18 @@ def save_model(model, optimizer, args, filepath):
 def train(args):
   """Train GPT-2 for paraphrase detection on the Quora dataset."""
   'may want to improve upon this'
+  # Initialize wandb if flag is set
+  if args.use_wandb:
+    wandb.init(
+      project="cs224n-paraphrase-detection",
+      name=f"{args.model_size}-lr{args.lr}",
+      config={
+        "learning_rate": args.lr,
+        "epochs": args.epochs,
+        "batch_size": args.batch_size,
+        "model_size": args.model_size
+      }
+    )
   device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
   # Create the data and its corresponding datasets and dataloader.
   para_train_data = load_paraphrase_data(args.para_train)
@@ -154,6 +167,18 @@ def train(args):
       save_model(model, optimizer, args, args.filepath)
 
     print(f"Epoch {epoch}: train loss :: {train_loss :.3f}, dev acc :: {dev_acc :.3f}")
+    # Log metrics to wandb
+    if args.use_wandb:
+      wandb.log({
+      "epoch": epoch,
+      "train_loss": train_loss,
+      "dev_accuracy": dev_acc,
+      "dev_f1": dev_f1
+    })
+  
+    # At the end of training:
+    if args.use_wandb:
+      wandb.finish()
 
 
 @torch.no_grad()
@@ -206,6 +231,7 @@ def get_args():
   parser.add_argument("--seed", type=int, default=11711)
   parser.add_argument("--epochs", type=int, default=10)
   parser.add_argument("--use_gpu", action='store_true')
+  parser.add_argument("--use_wandb", action='store_true') 
 
   parser.add_argument("--batch_size", help='sst: 64, cfimdb: 8 can fit a 12GB GPU', type=int, default=8)
   parser.add_argument("--lr", type=float, help="learning rate", default=1e-5)
