@@ -51,13 +51,14 @@ class ParaphraseGPT(nn.Module):
   def __init__(self, args):
     super().__init__()
     self.gpt = GPT2Model.from_pretrained(model=args.model_size, d=args.d, l=args.l, num_heads=args.num_heads)
-    self.paraphrase_detection_head = nn.Linear(args.d, 2)  # Paraphrase detection has two outputs: 1 (yes) or 0 (no).
+    #self.paraphrase_detection_head = nn.Linear(args.d, 2)  # Paraphrase detection has two outputs: 1 (yes) or 0 (no).
 
     # By default, fine-tune the full model.
     for param in self.gpt.parameters():
       param.requires_grad = True
 
   def forward(self, input_ids, attention_mask):
+    
     """
     TODO: Predict the label of the token using the paraphrase_detection_head Linear layer.
 
@@ -72,8 +73,15 @@ class ParaphraseGPT(nn.Module):
 
     'Takes a batch of sentences and produces embeddings for them.'
     ### YOUR CODE HERE
-    raise NotImplementedError
+    # Get the hidden states from GPT-2
+    hidden_states = self.gpt(input_ids, attention_mask)
+    # Extract the last token representation
+    last_token = hidden_states['last_token']
 
+    # Apply the paraphrase detection head to get logits for yes/no
+    logits = self.gpt.hidden_state_to_token(last_token)
+    
+    return logits
 
 
 def save_model(model, optimizer, args, filepath):
@@ -92,6 +100,7 @@ def save_model(model, optimizer, args, filepath):
 
 def train(args):
   """Train GPT-2 for paraphrase detection on the Quora dataset."""
+  'may want to improve upon this'
   device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
   # Create the data and its corresponding datasets and dataloader.
   para_train_data = load_paraphrase_data(args.para_train)

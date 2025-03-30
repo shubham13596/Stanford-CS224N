@@ -42,7 +42,7 @@ def seed_everything(seed=11711):
 
 
 class SonnetGPT(nn.Module):
-  """Your GPT-2 Model designed for paraphrase detection."""
+  """Your GPT-2 Model designed for sonnet generation detection."""
 
   def __init__(self, args):
     super().__init__()
@@ -50,7 +50,7 @@ class SonnetGPT(nn.Module):
     self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
     self.tokenizer.pad_token = self.tokenizer.eos_token
 
-    # By default, fine-tune the full model. TODO: this is maybe not idea.
+    # By default, fine-tune the full model. TODO: this is maybe not ideal.
     for param in self.gpt.parameters():
       param.requires_grad = True
 
@@ -61,7 +61,17 @@ class SonnetGPT(nn.Module):
     not just the distribution over next tokens for the last token!
     """
     ### YOUR CODE HERE
-    raise NotImplementedError
+
+    # Get the hidden states from GPT-2
+    hidden_states = self.gpt(input_ids, attention_mask)
+    # Extract the last token representation
+    last_hidden_state = hidden_states['last_hidden_state']
+
+    # Apply the hidden state to token to get logits over all vocab_size
+    logits = self.gpt.hidden_state_to_token(last_hidden_state)
+    
+    return logits
+    
 
 
   def get_device(self):

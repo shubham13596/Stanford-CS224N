@@ -53,7 +53,7 @@ class GPT2SentimentClassifier(torch.nn.Module):
       elif config.fine_tune_mode == 'full-model':
         param.requires_grad = True
 
-    ### TODO: Create any instance variables you need to classify the sentiment of BERT embeddings.
+    ### TODO -done: Create any instance variables you need to classify the sentiment of BERT embeddings.
     ### YOUR CODE HERE
 
     # Define the classifier layer

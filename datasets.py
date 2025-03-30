@@ -108,7 +108,7 @@ def load_paraphrase_data(paraphrase_filename, split='train'):
                                 sent_id))
 
   else:
-    with open(paraphrase_filename, 'r') as fp:
+    with open(paraphrase_filename, 'r', encoding = 'utf-8') as fp:
       for record in csv.DictReader(fp, delimiter='\t'):
         try:
           sent_id = record['id'].lower().strip()

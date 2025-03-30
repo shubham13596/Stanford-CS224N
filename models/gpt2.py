@@ -99,7 +99,9 @@ class GPT2Model(GPTPreTrainedModel):
 
       return hidden_state(s) * E^T
     """
-    return self.word_embedding(hidden_state)
+    embedding_weight = self.word_embedding.weight
+
+    return torch.matmul(hidden_state, embedding_weight.transpose(0,1))
     
 
   @classmethod
