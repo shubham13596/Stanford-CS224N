@@ -153,7 +153,11 @@ def train(args):
 
   # Initialize model
   model = ParaphraseGPT(args)
+  #model.gpt.gradient_checkpointing_enable()  # Enable gradient checkpointing
   model = model.to(device)
+
+  # Mixed precision
+  scaler = torch.amp.GradScaler('cuda')
 
   # Apply torch.compile if requested and available
   if args.use_compile and hasattr(torch, 'compile'):
@@ -187,10 +191,17 @@ def train(args):
 
       # Compute the loss, gradients, and update the model's parameters.
       optimizer.zero_grad()
-      logits = model(b_ids, b_mask)
+      with torch.amp.autocast('cuda'):
+        logits = model(b_ids, b_mask)
+        loss = F.cross_entropy(logits, labels)
+      #logits = model(b_ids, b_mask)
       preds = torch.argmax(logits, dim=1)
-      loss = F.cross_entropy(logits, labels, reduction='mean')
-      loss.backward()
+      #loss = F.cross_entropy(logits, labels, reduction='mean')
+      #loss.backward()
+      scaler.scale(loss).backward()
+      scaler.step(optimizer)
+      scaler.update()
+      
       optimizer.step()
 
       train_loss += loss.item()

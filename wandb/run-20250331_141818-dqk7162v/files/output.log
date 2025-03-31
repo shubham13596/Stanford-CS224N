@@ -1,0 +1,12 @@
+Loaded 283003 train examples from data/quora-train.csv
+Loaded 40429 train examples from data/quora-dev.csv
+Applied LoRA to GPT-2 model
+Trainable parameters: 589,824 (0.47% of total)
+Traceback (most recent call last):
+  File "paraphrase_detection.py", line 344, in <module>
+    train(args)
+  File "paraphrase_detection.py", line 156, in train
+    model.gpt.gradient_checkpointing_enable()  # Enable gradient checkpointing
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1729, in __getattr__
+    raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+AttributeError: 'GPT2Model' object has no attribute 'gradient_checkpointing_enable'
