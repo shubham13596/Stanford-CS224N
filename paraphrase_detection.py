@@ -15,6 +15,7 @@ import argparse
 import random
 import torch
 import wandb
+import os
 
 import numpy as np
 import torch.nn.functional as F
@@ -32,6 +33,9 @@ from evaluation import model_eval_paraphrase, model_test_paraphrase
 from models.gpt2 import GPT2Model
 
 from optimizer import AdamW
+
+# Import our LoRA modules
+from lora_adapter import apply_lora_to_gpt2
 
 TQDM_DISABLE = False
 
@@ -52,14 +56,27 @@ class ParaphraseGPT(nn.Module):
   def __init__(self, args):
     super().__init__()
     self.gpt = GPT2Model.from_pretrained(model=args.model_size, d=args.d, l=args.l, num_heads=args.num_heads)
-    #self.paraphrase_detection_head = nn.Linear(args.d, 2)  # Paraphrase detection has two outputs: 1 (yes) or 0 (no).
+    self.paraphrase_detection_head = nn.Linear(args.d, 2)  # Paraphrase detection has two outputs: 1 (yes) or 0 (no).
 
-    # By default, fine-tune the full model.
-    for param in self.gpt.parameters():
+    # Apply LoRA to the model
+    if not hasattr(args, 'no_lora') or not args.no_lora:
+      self.gpt = apply_lora_to_gpt2(
+        self.gpt,
+        lora_r = args.lora_r,
+        lora_alpha = args.lora_alpha, 
+        lora_dropout = args.lora_dropout
+      )
+    
+    # Make sure the classification head is trainable
+    for param in self.paraphrase_detection_head.parameters():
       param.requires_grad = True
 
-  def forward(self, input_ids, attention_mask):
+    # By default, fine-tune the full model.
+    #for param in self.gpt.parameters():
+     # param.requires_grad = True
     
+
+  def forward(self, input_ids, attention_mask):
     """
     TODO: Predict the label of the token using the paraphrase_detection_head Linear layer.
 
@@ -106,12 +123,16 @@ def train(args):
   if args.use_wandb:
     wandb.init(
       project="cs224n-paraphrase-detection",
-      name=f"{args.model_size}-lr{args.lr}",
+      #name=f"{args.model_size}-lr{args.lr}",
+      name=f"{args.model_size}-lr{args.lr}-lora-r{args.lora_r}",
       config={
         "learning_rate": args.lr,
         "epochs": args.epochs,
         "batch_size": args.batch_size,
-        "model_size": args.model_size
+        "model_size": args.model_size,
+        "lora_r": args.lora_r,
+        "lora_alpha": args.lora_alpha,
+        "lora_dropout": args.lora_dropout
       }
     )
   device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
@@ -128,11 +149,20 @@ def train(args):
                                    collate_fn=para_dev_data.collate_fn)
 
   args = add_arguments(args)
+
+  # Initialize model
   model = ParaphraseGPT(args)
   model = model.to(device)
 
+  # Print parameter count
+  total_params = sum(p.numel() for p in model.parameters())
+  trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+  print(f"Total parameters: {total_params:,}")
+  print(f"Trainable parameters: {trainable_params:,} ({trainable_params/total_params:.2%})")
+
   lr = args.lr
-  optimizer = AdamW(model.parameters(), lr=lr, weight_decay=0.)
+  #optimizer = AdamW(model.parameters(), lr=lr, weight_decay=0.)
+  optimizer = AdamW([p for p in model.parameters() if p.requires_grad], lr=args.lr, weight_decay=0.)
   best_dev_acc = 0
 
   # Run for the specified number of epochs.
@@ -189,6 +219,7 @@ def test(args):
 
   model = ParaphraseGPT(saved['args'])
   model.load_state_dict(saved['model'])
+
   model = model.to(device)
   model.eval()
   print(f"Loaded model to test from {args.filepath}")
@@ -231,7 +262,13 @@ def get_args():
   parser.add_argument("--seed", type=int, default=11711)
   parser.add_argument("--epochs", type=int, default=10)
   parser.add_argument("--use_gpu", action='store_true')
-  parser.add_argument("--use_wandb", action='store_true') 
+  parser.add_argument("--use_wandb", action='store_true')
+
+  # LoRA specific arguments
+  parser.add_argument("--lora_r", type=int, help="rank of LoRA matrices", default=8)
+  parser.add_argument("--lora_alpha", type=int, help="scaling factor for LoRA", default=16)
+  parser.add_argument("--lora_dropout", type=float, help="dropout for LoRA layers", default=0.1)
+  parser.add_argument("--no_lora", action='store_true', help="Disable LoRA for ablation study")
 
   parser.add_argument("--batch_size", help='sst: 64, cfimdb: 8 can fit a 12GB GPU', type=int, default=8)
   parser.add_argument("--lr", type=float, help="learning rate", default=1e-5)
@@ -264,7 +301,16 @@ def add_arguments(args):
 
 if __name__ == "__main__":
   args = get_args()
-  args.filepath = f'{args.epochs}-{args.lr}-paraphrase.pt'  # Save path.
-  seed_everything(args.seed)  # Fix the seed for reproducibility.
+
+  # Create filepath based on hyperparameters
+  lora_tag = "" if args.no_lora else f"-lora-r{args.lora_r}"
+  args.filepath = f'{args.epochs}-{args.lr}{lora_tag}-paraphrase.pt'
+
+  #args.filepath = f'{args.epochs}-{args.lr}-paraphrase.pt'  # Save path.
+  
+  # Fix the seed for reproducibility.
+  seed_everything(args.seed)  
+  
+  # Train and evaluate
   train(args)
   test(args)
