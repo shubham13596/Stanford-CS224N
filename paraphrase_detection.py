@@ -156,6 +156,11 @@ def train(args):
   #model.gpt.gradient_checkpointing_enable()  # Enable gradient checkpointing
   model = model.to(device)
 
+  # Keep LayerNorm in FP32
+  for module in model.modules():
+    if isinstance(module, torch.nn.LayerNorm):
+      module.float()
+
   # Mixed precision
   scaler = torch.amp.GradScaler('cuda')
 
@@ -191,7 +196,7 @@ def train(args):
 
       # Compute the loss, gradients, and update the model's parameters.
       optimizer.zero_grad()
-      with torch.amp.autocast('cuda'):
+      with torch.amp.autocast('cuda', dtype=torch.bfloat16):
         logits = model(b_ids, b_mask)
         loss = F.cross_entropy(logits, labels)
       #logits = model(b_ids, b_mask)
@@ -199,6 +204,11 @@ def train(args):
       #loss = F.cross_entropy(logits, labels, reduction='mean')
       #loss.backward()
       scaler.scale(loss).backward()
+      
+      # Add gradient clipping
+      scaler.unscale_(optimizer)
+      torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+
       scaler.step(optimizer)
       scaler.update()
       
@@ -225,9 +235,9 @@ def train(args):
       "dev_f1": dev_f1
     })
   
-    # At the end of training:
-    if args.use_wandb:
-      wandb.finish()
+  # At the end of training:
+  if args.use_wandb:
+    wandb.finish()
 
 
 @torch.no_grad()

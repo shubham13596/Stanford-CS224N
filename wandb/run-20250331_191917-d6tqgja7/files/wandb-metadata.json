@@ -1,0 +1,36 @@
+{
+  "os":  "Windows-10-10.0.26100-SP0",
+  "python":  "CPython 3.8.20",
+  "startedAt":  "2025-03-31T13:49:17.388484Z",
+  "args":  [
+    "--lora_r",
+    "8",
+    "--use_wandb"
+  ],
+  "program":  "paraphrase_detection.py",
+  "codePath":  "paraphrase_detection.py",
+  "git":  {
+    "remote":  "https://github.com/shubham13596/CS224_final-project_mine.git",
+    "commit":  "58b33f4e6b2a83c2105bdeb10a5db46aa906e681"
+  },
+  "email":  "shubham13596@gmail.com",
+  "root":  "C:\\Users\\Abcom\\Downloads\\nlp\\public_cs224n_gpt",
+  "host":  "DESKTOP-5MU95A4",
+  "executable":  "C:\\Users\\Abcom\\miniconda3\\envs\\cs224n_dfp\\python.exe",
+  "codePathLocal":  "paraphrase_detection.py",
+  "cpu_count":  4,
+  "cpu_count_logical":  8,
+  "disk":  {
+    "/":  {
+      "total":  "511119978496",
+      "used":  "160767954944"
+    }
+  },
+  "memory":  {
+    "total":  "16892956672"
+  },
+  "cpu":  {
+    "count":  4,
+    "countLogical":  8
+  }
+}

@@ -1,0 +1,57 @@
+Loaded 283003 train examples from data/quora-train.csv
+Loaded 40429 train examples from data/quora-dev.csv
+Applied LoRA to GPT-2 model
+Trainable parameters: 589,824 (0.47% of total)
+C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\amp\grad_scaler.py:132: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
+  warnings.warn(
+Total parameters: 125,621,762
+Trainable parameters: 591,362 (0.47%)
+train-0:   0%|                                                                             | 0/35376 [00:00<?, ?it/s]C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\amp\autocast_mode.py:265: UserWarning: User provided device_type of 'cuda', but CUDA is not available. Disabling
+  warnings.warn(
+train-0:   0%|                                                                  | 4/35376 [00:05<13:30:42,  1.38s/it]
+Traceback (most recent call last):
+  File "paraphrase_detection.py", line 354, in <module>
+    train(args)
+  File "paraphrase_detection.py", line 200, in train
+    logits = model(b_ids, b_mask)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "paraphrase_detection.py", line 95, in forward
+    hidden_states = self.gpt(input_ids, attention_mask)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\Abcom\Downloads\nlp\public_cs224n_gpt\models\gpt2.py", line 86, in forward
+    sequence_output = self.encode(embedding_output, attention_mask=attention_mask)
+  File "C:\Users\Abcom\Downloads\nlp\public_cs224n_gpt\models\gpt2.py", line 73, in encode
+    hidden_states = layer_module(hidden_states, extended_attention_mask)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\Abcom\Downloads\nlp\public_cs224n_gpt\modules\gpt2_layer.py", line 53, in forward
+    hidden_states = self.self_attention(hidden_states, attention_mask) # b h t d
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\Abcom\Downloads\nlp\public_cs224n_gpt\lora_adapter.py", line 154, in forward
+    value_layer = self.transform(hidden_states, self.value)
+  File "C:\Users\Abcom\Downloads\nlp\public_cs224n_gpt\lora_adapter.py", line 115, in transform
+    proj = linear_layer(x)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\Abcom\Downloads\nlp\public_cs224n_gpt\lora_adapter.py", line 50, in forward
+    original_output = self.original_layer(x)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\linear.py", line 117, in forward
+    return F.linear(input, self.weight, self.bias)
+KeyboardInterrupt
