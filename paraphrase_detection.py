@@ -132,7 +132,8 @@ def train(args):
         "model_size": args.model_size,
         "lora_r": args.lora_r,
         "lora_alpha": args.lora_alpha,
-        "lora_dropout": args.lora_dropout
+        "lora_dropout": args.lora_dropout,
+        "use_compile": args.use_compile
       }
     )
   device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
@@ -153,6 +154,13 @@ def train(args):
   # Initialize model
   model = ParaphraseGPT(args)
   model = model.to(device)
+
+  # Apply torch.compile if requested and available
+  if args.use_compile and hasattr(torch, 'compile'):
+      print("Using torch.compile for acceleration")
+      model = torch.compile(model)
+  elif args.use_compile and not hasattr(torch, 'compile'):
+      warnings.warn("torch.compile requested but not available (requires PyTorch 2.0+). Skipping compilation.")
 
   # Print parameter count
   total_params = sum(p.numel() for p in model.parameters())
@@ -275,6 +283,8 @@ def get_args():
   parser.add_argument("--model_size", type=str,
                       help="The model size as specified on hugging face. DO NOT use the xl model.",
                       choices=['gpt2', 'gpt2-medium', 'gpt2-large'], default='gpt2')
+  
+  parser.add_argument("--use_compile", action='store_true', help="Use torch.compile for PyTorch 2.0+ acceleration")
 
   args = parser.parse_args()
   return args
@@ -303,8 +313,16 @@ if __name__ == "__main__":
   args = get_args()
 
   # Create filepath based on hyperparameters
-  lora_tag = "" if args.no_lora else f"-lora-r{args.lora_r}"
-  args.filepath = f'{args.epochs}-{args.lr}{lora_tag}-paraphrase.pt'
+  opt_tags = []
+  if not args.no_lora:
+      opt_tags.append(f"lora-r{args.lora_r}")
+  #if args.use_flash_attn:
+  #    opt_tags.append("flashattn")
+  if args.use_compile:
+      opt_tags.append("compiled")
+    
+  opt_tag = "-" + "-".join(opt_tags) if opt_tags else ""
+  args.filepath = f'{args.epochs}-{args.lr}{opt_tag}-paraphrase.pt'
 
   #args.filepath = f'{args.epochs}-{args.lr}-paraphrase.pt'  # Save path.
   

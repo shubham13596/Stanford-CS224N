@@ -1,0 +1,41 @@
+Loaded 283003 train examples from data/quora-train.csv
+Loaded 40429 train examples from data/quora-dev.csv
+Applied LoRA to GPT-2 model
+Trainable parameters: 589,824 (0.47% of total)
+Total parameters: 125,621,762
+Trainable parameters: 591,362 (0.47%)
+train-0:   0%|                                                                 | 20/35376 [00:28<13:55:12,  1.42s/it]
+Traceback (most recent call last):
+  File "paraphrase_detection.py", line 333, in <module>
+    train(args)
+  File "paraphrase_detection.py", line 190, in train
+    logits = model(b_ids, b_mask)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "paraphrase_detection.py", line 95, in forward
+    hidden_states = self.gpt(input_ids, attention_mask)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\Abcom\Downloads\nlp\public_cs224n_gpt\models\gpt2.py", line 86, in forward
+    sequence_output = self.encode(embedding_output, attention_mask=attention_mask)
+  File "C:\Users\Abcom\Downloads\nlp\public_cs224n_gpt\models\gpt2.py", line 73, in encode
+    hidden_states = layer_module(hidden_states, extended_attention_mask)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\Abcom\Downloads\nlp\public_cs224n_gpt\modules\gpt2_layer.py", line 62, in forward
+    hidden_states = self.add(hidden_states, residual, 'out', self.out_dropout)
+  File "C:\Users\Abcom\Downloads\nlp\public_cs224n_gpt\modules\gpt2_layer.py", line 37, in add
+    x = self.out_dense(input)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1553, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\module.py", line 1562, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "C:\Users\Abcom\miniconda3\envs\cs224n_dfp\lib\site-packages\torch\nn\modules\linear.py", line 117, in forward
+    return F.linear(input, self.weight, self.bias)
+KeyboardInterrupt
