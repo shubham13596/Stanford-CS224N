@@ -64,7 +64,8 @@ class ParaphraseGPT(nn.Module):
         self.gpt,
         lora_r = args.lora_r,
         lora_alpha = args.lora_alpha, 
-        lora_dropout = args.lora_dropout
+        lora_dropout = args.lora_dropout,
+        use_flash_attn=args.use_flash_attn  # Pass the flag here
       )
     
     # Make sure the classification head is trainable
@@ -306,6 +307,8 @@ def get_args():
                       choices=['gpt2', 'gpt2-medium', 'gpt2-large'], default='gpt2')
   
   parser.add_argument("--use_compile", action='store_true', help="Use torch.compile for PyTorch 2.0+ acceleration")
+  parser.add_argument("--use_flash_attn", action='store_true', 
+                        help="Use FlashAttention for faster training (requires GPU)")
 
   args = parser.parse_args()
   return args
