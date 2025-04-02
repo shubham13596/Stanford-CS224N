@@ -1,7 +1,12 @@
 # CS 224N Default Final Project: Build GPT-2
 
-** This is my attempt at solving the final project of CS224N. Update as of 12th March - Part 1 of the Final project i.e. implementing GPT 2 is now complete. 
-Part 2 is WIP **
+** This is my attempt at solving the final project of CS224N. Update as of 1st April,'25 - Part 1 of the Final project i.e. implementing GPT 2 is now complete.
+Within Part 2- I have implemented LORA as part of fine-tuning on the Quora paraphrase detection dataset. Training on a A6000 GPU with mixed precision training  
+ 
+[Link](https://wandb.ai/shubham13596-self/cs224n-paraphrase-detection?nw=nwusershubham13596) for results of fine-tuning on GPT-2 medium (35mn parameters with Lora rank 8) & GPT-2 (12.5mns parameters with Lora rank 8) 
+
+Flash attention & SHAMPOO optimization WIP
+**
 
 This is the default final project for the Stanford CS 224N class. Please refer to the project handout on the course
 website for detailed instructions and an overview of the codebase.
