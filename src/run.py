@@ -107,7 +107,7 @@ if args.function == 'pretrain':
     ### YOUR CODE HERE ###
     tconf = TrainerConfig(max_epochs = 650, batch_size = 128, learning_rate = args.pretrain_lr,
                         lr_decay=True, warmup_tokens=512*20, final_tokens=650*len(pretrain_dataset)*block_size,
-                        num_workers=0, writer=writer)
+                        num_workers=4, writer=writer)
     
     # Create trainer and train
     trainer = Trainer(model, pretrain_dataset, None, tconf)
@@ -162,7 +162,7 @@ elif args.function == 'finetune':
 
         tconf = TrainerConfig(max_epochs=75, batch_size=256, learning_rate=args.finetune_lr,
                             lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
-                            num_workers=0, writer=writer)
+                            num_workers=4, writer=writer)
         
         # Create trainer and train
         trainer = Trainer(model, finetune_dataset, None, tconf)
@@ -178,7 +178,7 @@ elif args.function == 'finetune':
 
     tconf = TrainerConfig(max_epochs=10, batch_size=256, learning_rate=args.finetune_lr,
                         lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
-                        num_workers=0, writer=writer)
+                        num_workers=4, writer=writer)
     
     # Create trainer and train
     trainer = Trainer(model, finetune_dataset, None, tconf)
