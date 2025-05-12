@@ -101,7 +101,44 @@ class CharCorruptionDataset(Dataset):
     def __getitem__(self, idx):
         # TODO [part e]: see spec above
         ### YOUR CODE HERE ###
-        pass
+        document = self.data[idx]
+        
+        # Randomly truncate the document
+        max_trunc_len = int(self.block_size * 7/8)
+        min_trunc_len = min(4, len(document))  # In case document is shorter than 4 chars
+        trunc_len = random.randint(min_trunc_len, min(max_trunc_len, len(document)))
+        
+        trunc_doc = document[:trunc_len] if len(document) > trunc_len else document
+       
+        # 2. Break the document into prefix, masked_content, and suffix
+        # The masked content length should be random, averaging 1/4 of document length
+        masked_len = random.randint(1, max(1, len(trunc_doc) // 2))  # Allow variation
+
+        # Choose a random split point for the prefix
+        prefix_len = random.randint(0, len(trunc_doc) - masked_len)
+
+        prefix = trunc_doc[:prefix_len]
+        masked_content = trunc_doc[prefix_len:prefix_len + masked_len]
+        suffix = trunc_doc[prefix_len + masked_len:]
+
+        # 3. Rearrange into the required form
+        # [prefix] MASK_CHAR [suffix] MASK_CHAR [masked_content] [pads]
+        masked_string = prefix + self.MASK_CHAR + suffix + self.MASK_CHAR + masked_content
+        
+        # Add padding to reach block_size + 1
+        padding_needed = self.block_size + 1 - len(masked_string)
+        masked_string = masked_string + self.PAD_CHAR * max(0, padding_needed)
+
+        # Truncate if somehow longer than block_size + 1
+        masked_string = masked_string[:self.block_size + 1]
+
+        input_string = masked_string[:-1]
+        output_string = masked_string[1:]
+
+        x = torch.tensor([self.stoi[char] for char in input_string], dtype = torch.long)
+        y = torch.tensor([self.stoi[char] for char in output_string], dtype = torch.long)
+
+        return x, y
         ### END YOUR CODE ###
 
 

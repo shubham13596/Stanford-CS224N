@@ -104,7 +104,17 @@ if args.function == 'pretrain':
     # writer=writer
 
     ### YOUR CODE HERE ###
-    pass
+    tconf = TrainerConfig(max_epochs = 650, batch_size = 128, learning_rate = args.pretrain_lr,
+                        lr_decay=True, warmup_tokens=512*20, final_tokens=650*len(pretrain_dataset)*block_size,
+                        num_workers=0, writer=writer)
+    
+    # Create trainer and train
+    trainer = Trainer(model, pretrain_dataset, None, tconf)
+    trainer.train()
+
+    # Save the trained model to the specified path
+    torch.save(model.state_dict(), args.writing_params_path)
+    
     ### END YOUR CODE ###
 elif args.function == 'finetune':
     assert args.writing_params_path is not None
@@ -144,11 +154,28 @@ elif args.function == 'finetune':
 
     ### YOUR CODE HERE ###
 
-    # Create the name dataset using the finetune corpus
+    # finetuning without pre-training code below:
+    if args.reading_params_path is None:
+        finetune_corpus = open(args.finetune_corpus_path, encoding='utf-8').read()
+        finetune_dataset = dataset.NameDataset(pretrain_dataset, finetune_corpus)
+
+        tconf = TrainerConfig(max_epochs=75, batch_size=256, learning_rate=args.finetune_lr,
+                            lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
+                            num_workers=0, writer=writer)
+        
+        # Create trainer and train
+        trainer = Trainer(model, finetune_dataset, None, tconf)
+        trainer.train()
+
+        # Save the trained model to the specified path
+        torch.save(model.state_dict(), args.writing_params_path)
+
+    # finetuning with pre-training code below:
+    model.load_state_dict(torch.load(args.reading_params_path))
     finetune_corpus = open(args.finetune_corpus_path, encoding='utf-8').read()
     finetune_dataset = dataset.NameDataset(pretrain_dataset, finetune_corpus)
 
-    tconf = TrainerConfig(max_epochs=75, batch_size=256, learning_rate=args.finetune_lr,
+    tconf = TrainerConfig(max_epochs=10, batch_size=256, learning_rate=args.finetune_lr,
                         lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
                         num_workers=0, writer=writer)
     
@@ -158,6 +185,9 @@ elif args.function == 'finetune':
 
     # Save the trained model to the specified path
     torch.save(model.state_dict(), args.writing_params_path)
+
+
+
     
     ### END YOUR CODE ###
 elif args.function == 'evaluate':
