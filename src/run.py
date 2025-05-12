@@ -161,12 +161,7 @@ elif args.function == 'finetune':
         finetune_dataset = dataset.NameDataset(pretrain_dataset, finetune_corpus)
         tconf = TrainerConfig(max_epochs=75, batch_size=256, learning_rate=args.finetune_lr,
                             lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
-<<<<<<< HEAD
                             num_workers=0, writer=writer)
-=======
-                            num_workers=4, writer=writer)
-        
->>>>>>> 7928fba2836680e59efd830b5795d564dacac9f2
         # Create trainer and train
         trainer = Trainer(model, finetune_dataset, None, tconf)
         trainer.train()
