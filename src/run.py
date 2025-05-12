@@ -159,11 +159,9 @@ elif args.function == 'finetune':
     if args.reading_params_path is None:
         finetune_corpus = open(args.finetune_corpus_path, encoding='utf-8').read()
         finetune_dataset = dataset.NameDataset(pretrain_dataset, finetune_corpus)
-
         tconf = TrainerConfig(max_epochs=75, batch_size=256, learning_rate=args.finetune_lr,
                             lr_decay=True, warmup_tokens=512*20, final_tokens=200*len(pretrain_dataset)*block_size,
                             num_workers=0, writer=writer)
-        
         # Create trainer and train
         trainer = Trainer(model, finetune_dataset, None, tconf)
         trainer.train()
@@ -186,8 +184,6 @@ elif args.function == 'finetune':
 
     # Save the trained model to the specified path
     torch.save(model.state_dict(), args.writing_params_path)
-
-
 
     
     ### END YOUR CODE ###

@@ -18,13 +18,14 @@ from torch.nn import functional as F
 logger = logging.getLogger(__name__)
 
 
+
 def precompute_rotary_emb(dim, max_positions):
     """
     RoPE uses the following sinusoidal functions to encode positions:
 
     cos(t theta_i) and sin(t theta_i)
         where t is the position and
-              theta_i = 1/10000^(-2(i-1)/dim) for i in [1, dim/2]
+              theta_i = 10000^(-2(i-1)/dim) for i in [1, dim/2]
 
     Since the maximum length of sequences is known, we can precompute
     these values to speed up training.
@@ -34,33 +35,34 @@ def precompute_rotary_emb(dim, max_positions):
     the cos and sin values for each position and each dimension of
     the embedding.
     """
-
-    rope_cache = None
-    # TODO: [part g]
-    ### YOUR CODE HERE ###
-    tensor_list = []
-    for t in range(max_positions):
-        row_list = []
-        # Loop over all dimensions from 1 to dim/2
-        for i in range(1, int(dim/2) + 1):
-            theta_i = 10000 ** (-2 * (i - 1) / dim)
-            t_theta_i = t * theta_i
-            # Use scalar values, not tensors for each element
-            cos_t_theta_i = math.cos(t_theta_i)
-            sin_t_theta_i = math.sin(t_theta_i)
-            # Append as a single list for this dimension
-            row_list.append([cos_t_theta_i, sin_t_theta_i])
-        tensor_list.append(row_list)
     
-    # Convert the list to a tensor with the correct shape
-    rope_cache = torch.tensor(tensor_list, dtype=torch.float)
+    # : [part g]
+    ### YOUR CODE HERE ###
+    # Initialize tensor of the correct shape
+    rope_cache = torch.zeros(max_positions, dim//2, 2)
+    
+    # Compute theta_i for each dimension using the correct formula
+    # For i in {1, 2, ..., dim/2}, compute theta_i = 10000^(-2(i-1)/dim)
+    i_values = torch.arange(1, dim//2 + 1, dtype=torch.float)
+    theta = 10000 ** (-2 * (i_values - 1) / dim)
+    
+    # Compute position values
+    positions = torch.arange(0, max_positions, dtype=torch.float).unsqueeze(1)
+    
+    # Compute the products for all positions and dimensions at once
+    # positions is [max_positions, 1] and theta is [dim//2]
+    # so the result is [max_positions, dim//2]
+    pos_dim = positions * theta
+    
+    # Fill the cache with cos and sin values
+    rope_cache[:, :, 0] = torch.cos(pos_dim)
+    rope_cache[:, :, 1] = torch.sin(pos_dim)
     ### END YOUR CODE ###
     return rope_cache
 
-
 def apply_rotary_emb(x, rope_cache):
     """Apply the RoPE to the input tensor x."""
-    # TODO: [part g]
+    # 
     # You might find the following functions useful to convert
     # between real and complex numbers:
 
