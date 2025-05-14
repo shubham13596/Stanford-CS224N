@@ -1,3 +1,5 @@
-#CS 224N (Natural Language Processing with Deep Learning)
+# CS 224N (Natural Language Processing with Deep Learning)
 
-Repo for all assignments as done as part of the course CS224N Winter 20225 course[https://web.stanford.edu/class/cs224n/]
+Repo for all assignments done as part of Stanford's CS224N Winter 2025 online course.
+
+Course website: [https://web.stanford.edu/class/cs224n/](https://web.stanford.edu/class/cs224n/)
